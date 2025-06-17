@@ -1,0 +1,48 @@
+# DevInsight Project Tracker
+# Format: Each section is prefixed with a keyword. Use this structure for updates or cross-chat use.
+
+## Metadata
+ProjectName: DevInsight - Developer Productivity Tracker
+CreatedOn: 2025-06-17
+
+## Completed
+- [x] Finalized project idea
+- [x] Outlined project structure (backend/frontend/db)
+- [x] Defined GitHub OAuth flow
+
+## InProgress
+- [ ] Backend setup (Flask or Node.js)
+- [ ] GitHub OAuth app config
+- [ ] React frontend initialization
+- [ ] Login UI + GitHub login testing
+
+## Upcoming: Week 2 - GitHub Commit Data Extraction
+- [ ] Fetch user repos (`/api/repos`)
+- [ ] Fetch commit history (`/api/commits?repo=name`)
+- [ ] PostgreSQL schema (Users, Repos, Commits)
+- [ ] ETL: Extract & store commit metadata
+
+## Upcoming: Week 3 - Analytics APIs
+- [ ] `/api/stats/commits-per-day`
+- [ ] `/api/stats/code-churn`
+- [ ] `/api/stats/top-files`
+- [ ] `/api/stats/productivity-window`
+- [ ] SQL aggregation queries
+- [ ] Unit tests for analytics routes
+
+## Upcoming: Week 4 - Dashboard
+- [ ] Use Recharts/Chart.js
+- [ ] UI for commit/churn/productivity graphs
+- [ ] Generate insights/summaries
+
+## Upcoming: Week 5 - Polish & Deploy
+- [ ] Add logout/session handling
+- [ ] Deploy backend + frontend
+- [ ] Docs + screenshots
+- [ ] Resume bullet point
+
+## OptionalAdvanced
+- [ ] VS Code Extension integration
+- [ ] ML for commit message classification
+- [ ] Export as PDF/CSV
+- [ ] Team-wide dashboard support
