@@ -7,8 +7,13 @@ from dotenv import load_dotenv
 #load an environtment with variables set in an .env file
 load_dotenv()
 
+#this allows us to use HTTP, as OAuth2 requires HTTPS for security
+#if ever gets past interanal use, REMOVE THIS
+#TODO: REMOVE THIS IF PAST INTERNAL USE AND TESTING
+os.environ["OATHLIB_INSECURE_TRANSPORT"] = os.getenv("OAUTHLIB_INSECURE_TRANSPORT", "1")
+
 #initalize Flask web application, and enable Cross-Origin Resource Sharing
-app = Flask(_name_)
+app = Flask(__name__)
 app.secret_key = os.getenv("FLASK_SECRET_KEY", "supersekrit")
 CORS(app)
 
