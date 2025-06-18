@@ -3,3 +3,4 @@ flask-cors
 flask-dance[github]
 requests
 python-dotenv
+psycopg2-binary
