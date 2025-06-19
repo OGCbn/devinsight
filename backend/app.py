@@ -2,6 +2,7 @@ from flask import Flask, redirect, url_for, session, request
 from flask_dance.contrib.github import make_github_blueprint, github
 from flask_cors import CORS
 import os
+import requests
 from dotenv import load_dotenv
 
 #load an environtment with variables set in an .env file
@@ -64,21 +65,45 @@ def get_repos():
 #this function will execute when we go to /commits
 @app.route("/commits")
 def get_commits():
-    #failure case
-    if not github.authorized:
-        return redirect(url_for("github.login"))
-    
     #to be changed for ease of use, currently must manually choose the repos
     repo_full_name = request.args.get("repo")
     if not repo_full_name:
         return {"error": "Missing 'repo' query parameter"}, 400
     
-    #we now get the commit history, currently set to only return the last 10 commits to limit stress
-    resp = github.get(f"/repos/{repo_full_name}/commits?per_page=10")
-    if not resp.ok:
-        return f"Failed to fetch commits: {resp.text}", 500
+    #personal access token, this is done to allow etl automatic scraping
+    pat_token = request.headers.get("Authorization")
+    if pat_token:
+        header = {
+            "Accept": "application/vnd.github+json",
+            "Authorization": pat_token,
+            "X-GitHub-Api-Version": "2022-11-28"
+        }
+        #we now get the commit history, currently set to only return the last 10 commits to limit stress
+        url = f"https://api.github.com/repos/{repo_full_name}/commits"
+        resp = requests.get(url, headers=header)
+        if not resp.ok:
+            return f"Failed to fetch commits: {resp.text}", 500
+        
+        #this is where we manipulate the data, currently jsut getting metadata
+        commit_data = resp.json()
+        simplified = []
+        for c in commit_data:
+            simplified.append({
+                "sha": c["sha"],
+                "message": c["commit"]["message"],
+                "author": c["commit"]["author"]["name"],
+                "date": c["commit"]["author"]["date"]
+            })
+        return {"commits": simplified}
     
-    #this is where we manipulate the data, currently jsut getting metadata
+    #no token so we are manually accessing it
+    if not github.authorized:
+        return redirect(url_for("github.login"))
+    
+    resp = github.get(f"/repos/{repo_full_name}/commits?per_page=10")
+    if not resp:
+        return f"Failed to get the commit history: {resp.text}", 500
+    
     commit_data = resp.json()
     simplified = []
     for c in commit_data:

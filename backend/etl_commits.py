@@ -1,18 +1,22 @@
 import requests
 import sqlite3
 import os
-
+from dotenv import load_dotenv
+load_dotenv()
 #configuration
 #TODO: AUTOMATE FOR ALL REPOS, currently testing only one
 REPO = "OGCbn/devinsight"
 BACKEND_URL = f"http://localhost:5000/commits?repo={REPO}"
+GITHUB_PAT = os.getenv("GITHUB_PAT")
 DB_PATH = os.path.join(os.path.dirname(__file__), "devinsight.db")
 
 #fetch commits
 def fetch_commits():
     print(f"Fetching commits for {REPO}")
-
-    resp = requests.get(BACKEND_URL)
+    headers = {
+        "Authorization": GITHUB_PAT
+    }
+    resp = requests.get(BACKEND_URL, headers=headers)
     if resp.status_code != 200:
         print("Failed to fetch commits", resp.text)
         return []
