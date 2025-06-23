@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, session, request
+from flask import Flask, redirect, url_for, session, request, jsonify
 from flask_dance.contrib.github import make_github_blueprint, github
 from flask_cors import CORS
 import os

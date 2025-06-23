@@ -50,6 +50,6 @@ if __name__ == "__main__":
         commits = fetch_commits_for_repo(full_name)
         #has commits,<always TRUE unless error in fetching>
         if commits:
-            insert_commits(commits)
+            insert_commits(commits, full_name)
         else:
             print("No commits found for {full_name}")

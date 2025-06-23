@@ -23,16 +23,16 @@ def fetch_commits():
     return resp.json()["commits"]
     
 #Insert the commits into the database
-def insert_commits(commits):
+def insert_commits(commits, repo_name):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
 
     #placeholder repo entry
-    cur.execute("INSERT OR IGNORE INTO repos (full_name, user_id) VALUES (?, ?)", (REPO, 1))
+    cur.execute("INSERT OR IGNORE INTO repos (full_name, user_id) VALUES (?, ?)", (repo_name, 1))
     conn.commit()
 
     #get the repo_id
-    cur.execute("SELECT id FROM repos WHERE full_name = ?", (REPO,))
+    cur.execute("SELECT id FROM repos WHERE full_name = ?", (repo_name,))
     repo_id = cur.fetchone()[0]
 
     for c in commits:
