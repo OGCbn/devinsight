@@ -13,15 +13,13 @@ CreatedOn: 2025-06-17
 - [X] GitHub OAuth app config
 - [X] React frontend initialization
 - [X] Login UI + GitHub login testing
-
-## InProgress
 - [X] Fetch user repos (`/api/repos`)
-- [ ] Fetch commit history (`/api/commits?repo=name`)
-- [ ] PostgreSQL schema (Users, Repos, Commits)
-- [ ] ETL: Extract & store commit metadata
+- [X] Fetch commit history (`/api/commits?repo=name`)
+- [X] PostgreSQL schema (Users, Repos, Commits)
+- [X] ETL: Extract & store commit metadata
 
 
-## Upcoming: Week 3 - Analytics APIs
+## Working on It
 - [ ] `/api/stats/commits-per-day`
 - [ ] `/api/stats/code-churn`
 - [ ] `/api/stats/top-files`

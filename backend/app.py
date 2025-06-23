@@ -4,7 +4,7 @@ from flask_cors import CORS
 import os
 import requests
 from dotenv import load_dotenv
-
+import sqlite3
 #load an environtment with variables set in an .env file
 load_dotenv()
 
@@ -46,7 +46,24 @@ def index():
 #this function will execute when we go to the /repos URL
 @app.route("/repos")
 def get_repos():
-    #failure case
+    #PAT used
+    pat_token = request.headers.get("Authorization")
+    if pat_token:
+        HEADERS = {
+            "Accept": "application/vnd.github+json",
+            "Authorization": pat_token,
+            "X-GitHub-Api-Version": "2022-11-28"
+        }
+
+        #now call the GIT API with the PAT
+        resp = requests.get("https://api.github.com/user/repos", headers=HEADERS)
+        if not resp.ok:
+            return f"Failed to fetch repos<PAT USAGE>: {resp.text}", 500
+        
+        repo_data = resp.json()
+        simplified = [{"name": r["name"], "full_name": r["full_name"]} for r in repo_data]
+        return {"repos": simplified}
+    #no PAT used
     if not github.authorized:
         return redirect(url_for("github.login"))
     
@@ -115,8 +132,48 @@ def get_commits():
         })
     return {"commits": simplified}
 
+###----------STATS----------###
+@app.route("/api/stats/commits-per-day")
+def commits_per_day():
+    author = request.args.get("author")
+    repo = request.args.get("repo")
+    
+    conn = sqlite3.connect("devinsight.db")
+    cur = conn.cursor()
 
+    query = """
+            SELECT c.date
+            FROM commits c
+            JOIN repos r ON c.repo_id = r.id
+            WHERE 1=1
+    """
+    params = []
+    
+    if author:
+        query += " AND c.author = ?"
+        params.append(author)
+    
+    if repo:
+        query += " AND r.full_name = ?"
+        params.append(repo)
+    
+    cur.execute(query, params)
+    rows = cur.fetchall()
+    conn.close()
 
+    from collections import defaultdict
+    from datetime import datetime
+
+    daily_counts = defaultdict(int)
+    for (date_str,) in rows:
+        try:
+            date = datetime.fromisoformat(date_str).date()
+        except ValueError:
+            date = datetime.strptime(date_str, "%Y-%m-%d").date()
+        daily_counts[str(date)] += 1
+    
+    sorted_counts = sorted(daily_counts.items())
+    return jsonify([{"date": d, "count": c} for d, c in sorted_counts])
 ###-----------------------------------###
 ###             DEBUG                 ###
 
