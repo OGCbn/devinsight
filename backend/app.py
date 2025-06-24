@@ -174,6 +174,85 @@ def commits_per_day():
     
     sorted_counts = sorted(daily_counts.items())
     return jsonify([{"date": d, "count": c} for d, c in sorted_counts])
+
+#display the top authors for a certain repo, with a possible limit default is 10
+@app.route("/api/stats/top-authors")
+def top_authors():
+    repo = request.args.get("repo")
+    limit = int(request.args.get("limit", 10))
+
+    conn = sqlite3.connect("devinsight.db")
+    cur = conn.cursor()
+
+    query = """
+        SELECT c.author, COUNT(*) as count
+        FROM commits c
+        JOIN repos r ON c.repo_id = r.id
+        WHERE 1=1
+    """
+
+    params = []
+    if repo:
+        query += " AND r.full_name = ?"
+        params.append(repo)
+    
+    query += " GROUP BY c.author ORDER BY count DESC LIMIT ?"
+    params.append(limit)
+
+    cur.execute(query, params)
+    rows = cur.fetchall()
+    conn.close()
+
+    return jsonify([{"author": a, "count": c} for a, c in rows])
+
+#commits per week for a certain author
+@app.route("/api/stats/productivity-trend")
+def productivity_trend():
+    repo = request.args.get("repo")
+
+    conn = sqlite3.connect("devinsight.db")
+    cur = conn.cursor()
+
+    query = """
+        SELECT c.author, c.date
+        FROM commits c
+        JOIN repos r on c.repo_id = r.id
+        WHERE 1=1
+    """
+
+    params = []
+    if repo:
+        query += " AND r.full_name = ?"
+        params.append(repo)
+    
+    cur.execute(query, params)
+    rows = cur.fetchall()
+    conn.close
+
+    #process the data from the call
+    from collections import defaultdict
+    from datetime import datetime, timedelta
+
+    trend = defaultdict(int)
+
+    for author, date_str in rows:
+        try:
+            date = datetime.fromisoformat(date_str)
+        except ValueError:
+            date = datetime.strptime(date_str, "%Y-%m-%d")
+        
+        #we now normalize to the start of week, date might be wednesday so we turn to monday
+        week_start = date - timedelta(days=date.weekday())
+        #dictionary key that will be used, should only be dates that are mondays
+        key = (author, str(week_start.date()))
+        trend[key] += 1
+
+    result = [
+        {"author": author, "week": week, "count": count}
+        for (author, week), count in sorted(trend.items())
+    ]
+
+    return jsonify(result)
 ###-----------------------------------###
 ###             DEBUG                 ###
 
