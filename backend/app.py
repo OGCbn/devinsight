@@ -61,7 +61,13 @@ def get_repos():
             return f"Failed to fetch repos<PAT USAGE>: {resp.text}", 500
         
         repo_data = resp.json()
-        simplified = [{"name": r["name"], "full_name": r["full_name"]} for r in repo_data]
+        simplified = [{
+            "name": r["name"],
+            "full_name": r["full_name"],
+            "owner": {
+                "avatar_url": r["owner"]["avatar_url"]
+            }
+        } for r in repo_data]
         return {"repos": simplified}
     #no PAT used
     if not github.authorized:

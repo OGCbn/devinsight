@@ -1,3 +1,4 @@
 backend/.env
 venv/
 backend/devinsight.db
+frontend/.env
